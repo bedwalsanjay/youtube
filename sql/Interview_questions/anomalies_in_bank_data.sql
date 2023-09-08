@@ -55,9 +55,13 @@ select * from BankUserActions
 -- 2. if log-in failed for continuosly >=3 times  then tag that day login attempt
 --    it as a anamoly( in a single day )
 
-anamoly_reason							userid	actiondate	attempt_cnt
-more than 2 withdrawal attempt in a day	3		2023-09-05	3
-more than 2 withdrawal attempt in a day	13		2023-09-07	4
+OUTPUT should be in below format
+
+--userid	anamoly_reason									actiondate	attempt_cnt
+--3		    more than 3 withdrawal attempt in a day			2023-09-05	3
+--13		more than 3 withdrawal attempt in a day			2023-09-07	4
+--1		    more than 3 failed login attempts in a day		2023-09-05	3
+--4		    more than 3 failed login attempts in a day		2023-09-05	3
 
 small requ
 1. filter the withdrawal transaction
@@ -94,14 +98,6 @@ where time_diff <=360
 group by actiondate,userid
 having count(actiontype)  >=3
 )
-
-
---userid	anamoly_reason									actiondate	attempt_cnt
---3		more than 3 withdrawal attempt in a day			2023-09-05	3
---13		more than 3 withdrawal attempt in a day			2023-09-07	4
---1		more than 3 failed login attempts in a day		2023-09-05	3
---4		more than 3 failed login attempts in a day		2023-09-05	3
-
 
 
 /*
