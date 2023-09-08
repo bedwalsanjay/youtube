@@ -49,13 +49,20 @@ select * from BankUserActions
 
 
 /*
+
+================
+Question
+================
+
 -- 1. if there >=3  withdrawal transaction from a user ( in a single day ) , 
 --	  time difference (gap) between 2 transactions of <=5 mins 
 --    then tag that "day transaction", as a anamoly 
 -- 2. if log-in failed for continuosly >=3 times  then tag that day login attempt
 --    it as a anamoly( in a single day )
 
-OUTPUT should be in below format
+================
+OutPut
+================
 
 --userid	anamoly_reason									actiondate	attempt_cnt
 --3		    more than 3 withdrawal attempt in a day			2023-09-05	3
