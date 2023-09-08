@@ -64,11 +64,11 @@ Question
 OutPut
 ================
 
---userid	anamoly_reason								actiondate	attempt_cnt
---3		    more than 3 withdrawal attempt in a day		2023-09-05	3
---13		more than 3 withdrawal attempt in a day		2023-09-07	4
---1		    more than 3 failed login attempts in a day	2023-09-05	3
---4		    more than 3 failed login attempts in a day	2023-09-05	3
+userid	|   anamoly_reason		                        | actiondate	| attempt_cnt
+3		|   more than 3 withdrawal attempt in a day		| 2023-09-05	| 3
+13	    |	more than 3 withdrawal attempt in a day		| 2023-09-07	| 4
+1		|   more than 3 failed login attempts in a day	| 2023-09-05	| 3
+4		|   more than 3 failed login attempts in a day	| 2023-09-05	| 3
 
 small requ
 1. filter the withdrawal transaction
