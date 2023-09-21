@@ -1,0 +1,140 @@
+1. create a source s3  bucket  edp-source
+2. create a target s3  bucket  edp-target
+3. create a sns arn:aws:sns:ap-south-1:526844078262:edp-topic
+4. create a sqs arn:aws:sqs:ap-south-1:526844078262:edp-queue
+5. sqs will subscibe the sns topic , test the subsciption via dummy sns message
+
+
+=================================================
+to allow sns to send message to our queue , apply below policy 
+https://docs.aws.amazon.com/sns/latest/dg/subscribe-sqs-queue-to-sns-topic.html
+====================================================
+
+{
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "sns.amazonaws.com"
+      },
+      "Action": "sqs:SendMessage",
+      "Resource": "arn:aws:sqs:ap-south-1:526844078262:sb_queue",
+      "Condition": {
+        "ArnEquals": {
+          "aws:SourceArn": "arn:aws:sns:ap-south-1:526844078262:sb_topic"
+        }
+      }
+    }
+  ]
+}       
+
+
+6. create a glue job <sb_glue> and IAM role <sb_role > having all the glue console permissions
+test the job with the arguements ( check if duplicates has been removed successfully from the target file or not )
+
+s3://youtube-demo-15082023/source_files/
+
+7. create a lambda 
+modify the lambda IAM role and attach permisions related to the SQS and cloudwatch
+8. test your lambda 
+you can use below test event 
+
+event= {
+   "Records":[
+      {
+         "messageId":"000a29ac-c63f-4ad9-b259-f7c8d646ea0a",
+         "receiptHandle":"AQEBHR94K6Nfj3ICsG7K2/8+ZikStNCd/Q85Jk9mI4dmzgf1mGU0ofhfRpA5wY6vHh5A/spheKm9OKGaQz7B+SSjdh2UajwwG4qtwFBLS1q4z+lggxgMyPjsFMByjhHcCt5jT+stX+xAqTLGHz9r6MFFovtM/5RkKz4NKmBx5ZbjQdIkY360zWXofIEvVCPrdPr8EpWh4ol8Si5QKimVcrjvauzvvDkta+3632kf7BbiYyublTJM9EQhYkc3yCQ4jrPWZ6z22HmIcOdH9hQFzAZyugT3D8ADJcU0Kf9KPWWgIQS1k2IzuW8eFWxTpZgh10UZjtNWxjVPLS/fmDOzM/oHJa4CqPOE4t070RleuC5lLGw8YuH/RLECQRd51u/zptYbatDlu6ErAolFu/J6GpVQRg==",
+         "body":"{\n  \"Type\" : \"Notification\",\n  \"MessageId\" : \"8bbb1344-a737-5e12-bddc-4e1376ed358d\",\n  \"TopicArn\" : \"arn:aws:sns:ap-south-1:526844078262:sb_topic\",\n  \"Subject\" : \"Amazon S3 Notification\",\n  \"Message\" : \"{\\\"Records\\\":[{\\\"eventVersion\\\":\\\"2.1\\\",\\\"eventSource\\\":\\\"aws:s3\\\",\\\"awsRegion\\\":\\\"ap-south-1\\\",\\\"eventTime\\\":\\\"2023-08-17T07:43:21.624Z\\\",\\\"eventName\\\":\\\"ObjectCreated:Copy\\\",\\\"userIdentity\\\":{\\\"principalId\\\":\\\"AWS:AIDAXVKS2VC3OL533N3PL\\\"},\\\"requestParameters\\\":{\\\"sourceIPAddress\\\":\\\"49.43.153.205\\\"},\\\"responseElements\\\":{\\\"x-amz-request-id\\\":\\\"YFXEVHJGR9NNR1FA\\\",\\\"x-amz-id-2\\\":\\\"xN5hGwyx+trhOwkHx6w8C7BIw6DlO7hJuFNzfOSWftbUdl8/CbWPlhkpPSTtfP+v7/EQOUJrTSChKLv6aiWlgybBIB2MYx91l8eOeF04d/o=\\\"},\\\"s3\\\":{\\\"s3SchemaVersion\\\":\\\"1.0\\\",\\\"configurationId\\\":\\\"sb_event\\\",\\\"bucket\\\":{\\\"name\\\":\\\"source-sb-2023\\\",\\\"ownerIdentity\\\":{\\\"principalId\\\":\\\"AV7CRGK0EWY46\\\"},\\\"arn\\\":\\\"arn:aws:s3:::source-sb-2023\\\"},\\\"object\\\":{\\\"key\\\":\\\"source_files/part-00000_orders_2.csv\\\",\\\"size\\\":4702,\\\"eTag\\\":\\\"14c73f0c4ba085969e025b0e1c7661cf\\\",\\\"sequencer\\\":\\\"0064DDCF9995930159\\\"}}}]}\",\n  \"Timestamp\" : \"2023-08-17T07:43:22.148Z\",\n  \"SignatureVersion\" : \"1\",\n  \"Signature\" : \"XGV9ZSkT/Pl/aDUG8mzUjViZrDqTM4dBKdyYUI857mT5ljKP1tQV8tSZgQqVOsI6Ox0jL6rSd2i+b3Zv0REmF4tVxP26G0lKZiO8QDmsmRVL8k9BYeIOqKXwP1sh0mqa2UIqlabBEMCyPOI36VpnknYM6i9qcbj3ciWemSCap62JiswsAuOhAU16J/nBQAiszGdp8mKVv4LCx4zMbmJflk5NkFoOE6dSQWexrx65XI/TAqvT2sOnzQfL1/7h9YcOMZlzfZH7aoE7bHMPh2l0eTQTUVkn7bk2Cchrov1t3JRuizxWIXmD+oS749xjtz5nWuxdJcwsEG6p6qoGl3AzJw==\",\n  \"SigningCertURL\" : \"https://sns.ap-south-1.amazonaws.com/SimpleNotificationService-01d088a6f77103d0fe307c0069e40ed6.pem\",\n  \"UnsubscribeURL\" : \"https://sns.ap-south-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:ap-south-1:526844078262:sb_topic:ae942058-0396-4673-a154-39e942f91741\"\n}",
+         "attributes":{
+            "ApproximateReceiveCount":"12",
+            "SentTimestamp":"1692258202179",
+            "SenderId":"AIDAJKTPXYYAO6CI6DPKS",
+            "ApproximateFirstReceiveTimestamp":"1692258202179"
+         },
+         "messageAttributes":{
+            
+         },
+         "md5OfBody":"e1c121a0d098b632c2b9a0a6850501e1",
+         "eventSource":"aws:sqs",
+         "eventSourceARN":"arn:aws:sqs:ap-south-1:526844078262:sb_queue",
+         "awsRegion":"ap-south-1"
+      }
+   ]
+}
+
+9. create a s3 notifcation 
+
+
+==============================================
+for s3 notification , use below access policy for SNS topic
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/ways-to-add-notification-config-to-bucket.html
+
+==============================================
+
+{
+    "Version": "2012-10-17",
+    "Id": "example-ID",
+    "Statement": [
+        {
+            "Sid": "Example SNS topic policy",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "s3.amazonaws.com"
+            },
+            "Action": [
+                "SNS:Publish"
+            ],
+            "Resource": "arn:aws:sns:ap-south-1:526844078262:sb_topic",
+            "Condition": {
+                "ArnLike": {
+                    "aws:SourceArn": "arn:aws:s3:*:*:source-sb-2023"
+                },
+                "StringEquals": {
+                    "aws:SourceAccount": "526844078262"
+                }
+            }
+        }
+    ]
+}   
+
+10. add a sqs trigger into the lambda 
+11. copy a file in source and see if lambda is invoking the glue job 
+12. create a database in glue/athena 
+13. create below lambda to trigger the crawler as soon as we have a file on targt s3 path , create a s3 notification on top of target location , target will be this lambda 
+
+#crawler-lambda
+import boto3
+
+def lambda_handler(event, context):
+
+    region = 'ap-south-1'
+    crawler_name = 'sb_crawler'
+    
+    # Create a Glue client
+    glue_client = boto3.client('glue', region_name=region)
+    
+    # Start the Glue Crawler
+    glue_client.start_crawler(
+        Name=crawler_name
+    )
+
+14. check the whole process again if cralwer is getting triggered once we have a file in target location 
+15. check the data in athena table   
+16. Create a Pagerduty service 
+17. Create a sns-topic which we will use for sending alert to the pager duty < sns_pagerduty > . Create a subscription for this topic using pagerduty integration URL
+18. Create cloudwatch event rule on glue job failure, action will be to send message to pagerduty sns topic
+
+{
+  "source": ["aws.glue"],
+  "detail-type": ["Glue Job State Change"],
+  "detail": {
+    "state": ["FAILED"],
+    "jobName": ["sb_glue", "glue_job2", "glue_job3"]
+  }
+}
+
+19. Create a dead letter queue
+20. create a pagerduty slack integration 
+21. Create a cloudwatch alarm for the messagevisibility>0 ,action will be to send message to pagerduty sns topic
+22. Create a syntax error in glue and check if pagerduty incident is getting created or not 
+23. Decrease the lambda retry to 0 and decrease the timeout to 1 second ( have a sleep 1 in lambda code  ) 
